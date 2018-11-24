@@ -1,7 +1,9 @@
 package edu.ucsb.cs56.pconrad;
 
-import static spark.Spark.port;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
 
+import static spark.Spark.port;
 
 /**
  * Hello world!
@@ -9,30 +11,22 @@ import static spark.Spark.port;
  */
 
 public class SparkDemo01 {
-
     public static void main(String[] args) {
 
-		System.out.println("About to set the port...");
-		
+        ArrayList<String> dbText = initDatabase();
+        final String displayText = makeString(dbText);
+
         port(getHerokuAssignedPort());
-		
-		System.out.println("");
-		System.out.println("(Don't worry about the warnings below about SLF4J... we'll deal with those later)");
-		System.out.println("");						  
-		System.out.println("In browser, visit: http://localhost:" + getHerokuAssignedPort() + "/hello");
-		System.out.println("");
-		spark.Spark.get("/hello", (req, res) -> "<p><b>Hello, World!</b> You just clicked the first link on my web app.</p>");
-
-		spark.Spark.get("/nihao", (req, res) -> "<b>Ni Hao</b>\n");
-
-		spark.Spark.get("/hola", (req, res) -> "<b>¡Hola!</b>\n");
-		
-		String html="<h1><a href='/hello'>Hello</a> World!</h1>\n" + "<p>This web app is powered by \n" + "<a href='https://github.com/reginafw/sparkjava-01'>this github repo</a></p>\n";
-
-		spark.Spark.get("/", (req, res) -> html);
-
-	}
 	
+	System.out.println("");
+	System.out.println("(Don't worry about the warnings below about SLF4J... we'll deal with those later)");
+	System.out.println("");  
+	System.out.println("In browser, visit: http://localhost:" + getHerokuAssignedPort() + "/hello");
+	System.out.println("");
+	spark.Spark.get("/", (req, res) -> displayText);
+
+    }
+    
     static int getHerokuAssignedPort() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         if (processBuilder.environment().get("PORT") != null) {
@@ -41,5 +35,21 @@ public class SparkDemo01 {
         return 4567; //return default port if heroku-port isn't set (i.e. on localhost)
     }
 
-	
+    static ArrayList<String> initDatabase() {
+        ArrayList<String> dbQuery = new ArrayList<>();
+        try {
+            dbQuery = Database.createDocument();
+        } catch (UnknownHostException e) {
+            System.out.println("Unknown Host thrown");
+        }
+        return dbQuery;
+    }
+
+    static String makeString(ArrayList<String> text) {
+        String resultString = "";
+        for (String s: text) {
+            resultString += "<b> " + s + "</b><br/>";
+        }
+        return resultString;
+    }
 }
